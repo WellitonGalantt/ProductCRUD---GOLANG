@@ -66,16 +66,58 @@ func (p *productController) GetProductById(ctx *gin.Context) {
 	}
 
 	product, err := p.productUsecase.GetProductById(productId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, err)
+		return
+	}
+
 	if product == nil {
 		response := model.Responde{Message: "Produto nao encontrado!"}
 		ctx.JSON(http.StatusNotFound, response)
 		return
 	}
 
+	ctx.JSON(http.StatusOK, product)
+}
+
+func (p *productController) UpdateProduct(ctx *gin.Context) {
+	id := ctx.Param("pdId")
+	if id == "" {
+		response := model.Responde{Message: "Id não pode ser nulo!"}
+		ctx.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	// Tentando converter para numero
+	productId, err := strconv.Atoi(id)
+	if err != nil {
+		response := model.Responde{Message: "Id informado invalido!"}
+		ctx.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	var product model.Product
+
+	err = ctx.BindJSON(&product)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, err)
 		return
 	}
+	product.ID = productId
+
+	updatedPd, err := p.productUsecase.UpdateProduct(&product)
+	if err != nil {
+		println("Erro aqui")
+		ctx.JSON(http.StatusBadRequest, err)
+		return
+	}
+
+	if updatedPd == nil {
+		response := model.Responde{Message: "Produto nao encontrado!"}
+		ctx.JSON(http.StatusNotFound, response)
+		return
+	}
 
 	ctx.JSON(http.StatusOK, product)
+
 }

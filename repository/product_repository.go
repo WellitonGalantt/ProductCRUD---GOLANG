@@ -79,6 +79,8 @@ func (pr *ProductRepository) CreateProduct(product model.Product) (int, error) {
 }
 
 func (pr *ProductRepository) GetProductById(id_product int) (*model.Product, error) {
+	// O banco compila a query uma vez.
+	// Depois você pode executá-la várias vezes mudando apenas os parâmetros.
 	query, err := pr.connection.Prepare("SELECT * FROM product WHERE id = $1")
 	if err != nil {
 		fmt.Println(err)
@@ -103,4 +105,29 @@ func (pr *ProductRepository) GetProductById(id_product int) (*model.Product, err
 
 	return &product, nil
 
+}
+
+// Recebendo o ponteiro porque vou criar no controller
+func (pr *ProductRepository) UpdateProduct(product *model.Product) (*model.Product, error) {
+	query, err := pr.connection.Prepare("UPDATE product SET product_name=$1, price=$2 WHERE id=$3 RETURNING id, product_name, price")
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	var updatedPd model.Product
+
+	err = query.QueryRow(product.Name, product.Price, product.ID).Scan(&updatedPd.ID, &updatedPd.Name, &updatedPd.Price)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+
+		fmt.Println(err)
+		return nil, err
+	}
+
+	defer query.Close()
+
+	return &updatedPd, nil
 }

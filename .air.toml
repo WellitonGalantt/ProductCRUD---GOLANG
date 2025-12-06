@@ -1,0 +1,17 @@
+# Arquivo de configuração do Air
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  cmd = "go build -o ./tmp/app.exe ./cmd/main.go"
+  bin = "tmp/app.exe"
+  include_ext = ["go"]
+  exclude_dir = ["tmp", "vendor"]
+
+[log]
+  time = true
+
+[color]
+  app = "cyan"
+  watcher = "yellow"
+  build = "green"

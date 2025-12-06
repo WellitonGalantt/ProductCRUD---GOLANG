@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	host     = "localhost"
-	port     = 5433
+	host     = "localhost" // go_db ou localhost
+	port     = 5433        //5433 windows e 5432 docker
 	user     = "postgres"
 	password = "1234"
 	dbname   = "postgres"

@@ -1,7 +1,7 @@
 services:
   go-app:
     container_name: go-app
-    image: go-api-tutorial
+    image: go-api-crud-product
     build: .
     ports:
       - "8000:8000"
