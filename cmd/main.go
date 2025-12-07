@@ -3,13 +3,25 @@ package main
 import (
 	"productcrud/controller"
 	"productcrud/db"
+	"productcrud/middleware"
 	"productcrud/repository"
 	"productcrud/usecase"
 
 	"github.com/gin-gonic/gin"
+
+	"log"
+
+	"github.com/joho/godotenv"
 )
 
+//go mod tidy
+
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("⚠️  Aviso: .env não encontrado, usando variáveis do sistema")
+	}
+
 	server := gin.Default()
 
 	dbConection, err := db.ConnectDB()
@@ -32,10 +44,15 @@ func main() {
 		})
 	})
 
-	server.GET("/products", ProductController.GetProducts)
-	server.POST("/product", ProductController.CreateProduct)
-	server.GET("/product/:pdId", ProductController.GetProductById)
-	server.PUT("/product/:pdId", ProductController.UpdateProduct)
+	//proteger as rotas:
+	// Todas que tiverem /api antes devem passar o header/token
+	api := server.Group("/api")
+	api.Use(middleware.AuthMiddleware())
+
+	api.GET("/products", ProductController.GetProducts)
+	api.POST("/product", ProductController.CreateProduct)
+	api.GET("/product/:pdId", ProductController.GetProductById)
+	api.PUT("/product/:pdId", ProductController.UpdateProduct)
 
 	server.POST("/user/register", UserController.RegisterUser)
 	server.POST("/user/login", UserController.LoginUser)

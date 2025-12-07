@@ -23,6 +23,16 @@ func NewProductController(usecase usecase.ProductUsecase) productController {
 
 // Aqui seria como se fosse um metodo de uma classe;
 func (p *productController) GetProducts(ctx *gin.Context) {
+	userIDAny, exists := ctx.Get("userId")
+	if !exists {
+		ctx.JSON(401, gin.H{"error": "Usuario nao autenticado!!"})
+		return
+	}
+
+	// Pegando o id do usuario autenticado
+	userID := userIDAny.(int)
+	_ = userID
+
 	products, err := p.productUsecase.GetProducts()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, err)

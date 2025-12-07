@@ -1,7 +1,7 @@
 package usecase
 
 import (
-	exception "productcrud/Exceptions"
+	apperror "productcrud/Exceptions"
 	"productcrud/model"
 	"productcrud/repository"
 	"strings"
@@ -41,7 +41,7 @@ func (uu *UserUsecase) RegisterUser(input *model.RegisterUserDTO) (int, error) {
 	return id, nil
 }
 
-func (uu *UserUsecase) LoginUser(input *model.RegisterUserDTO) error {
+func (uu *UserUsecase) LoginUser(input *model.RegisterUserDTO) (*model.User, error) {
 
 	//Faria o hash da senha:
 	// Password
@@ -53,15 +53,15 @@ func (uu *UserUsecase) LoginUser(input *model.RegisterUserDTO) error {
 
 	user, err := uu.repository.LoginUser(userInput)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	//Verificação de senha do banco com o input
 	if userInput.Password != user.Password {
-		return exception.ErrInvalidPassword
+		return nil, apperror.ErrInvalidPassword
 	}
 
-	return nil
+	return user, nil
 
 }
 

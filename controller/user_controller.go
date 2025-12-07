@@ -2,7 +2,8 @@ package controller
 
 import (
 	"errors"
-	exception "productcrud/Exceptions"
+	apperror "productcrud/Exceptions"
+	"productcrud/auth"
 	"productcrud/model"
 	"productcrud/usecase"
 	"regexp"
@@ -66,14 +67,14 @@ func (uc *UserController) LoginUser(ctx *gin.Context) {
 		ctx.JSON(400, gin.H{"error": "FORMATO JSON INVALIDO!"})
 		return
 	}
-	err := uc.userUsecase.LoginUser(&body)
+	user, err := uc.userUsecase.LoginUser(&body)
 	if err != nil {
-		if errors.Is(err, exception.ErrInvalidPassword) {
+		if errors.Is(err, apperror.ErrInvalidPassword) {
 			ctx.JSON(400, gin.H{"error": "Senha inválida"})
 			return
 		}
 
-		if errors.Is(err, exception.ErrInvalidCredentials) {
+		if errors.Is(err, apperror.ErrInvalidCredentials) {
 			ctx.JSON(400, gin.H{"error": "Email ou senha inválidos"})
 			return
 		}
@@ -82,6 +83,23 @@ func (uc *UserController) LoginUser(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(200, gin.H{"sucess": true, "message": "Login feito com sucesso!"})
+	// Gerar o token com JWT
+	token, err := auth.GenerateToken(user.ID)
+	if err != nil {
+		ctx.JSON(200, gin.H{"sucess": false, "error": "Erro ao gerar o token!!"})
+		return
+	}
+
+	//retornando o token para o front salvar e mandar nas requisicoes
+	ctx.JSON(200, gin.H{
+		"sucess":  true,
+		"message": "Login feito com sucesso!",
+		"token":   token,
+		"user": gin.H{
+			"id":    user.ID,
+			"name":  user.Name,
+			"email": user.Email,
+		},
+	})
 
 }

@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	exception "productcrud/Exceptions"
+	apperror "productcrud/Exceptions"
 	"productcrud/model"
 
 	"github.com/lib/pq"
@@ -29,8 +29,8 @@ func (ur *UserRepository) RegisterUser(user *model.User) (int, error) {
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			if pqErr.Code == "23505" && pqErr.Constraint == "users_email_key" {
-				fmt.Println(exception.ErrEmailAlreadyExists)
-				return 0, exception.ErrEmailAlreadyExists
+				fmt.Println(apperror.ErrEmailAlreadyExists)
+				return 0, apperror.ErrEmailAlreadyExists
 			}
 		}
 
@@ -48,7 +48,7 @@ func (ur *UserRepository) LoginUser(user *model.User) (*model.User, error) {
 	err := ur.connection.QueryRow(query, user.Email).Scan(&userLogin.ID, &userLogin.Name, &userLogin.Email, &userLogin.Password)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, exception.ErrInvalidCredentials
+			return nil, apperror.ErrInvalidCredentials
 		}
 		fmt.Println(err)
 		return nil, err

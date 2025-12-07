@@ -3,22 +3,25 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"os"
+	"strconv"
 
 	_ "github.com/lib/pq"
 )
 
-const (
-	host     = "localhost" // go_db ou localhost
-	port     = 5433        //5433 windows e 5432 docker
-	user     = "postgres"
-	password = "1234"
-	dbname   = "postgres"
+var (
+	host     = os.Getenv("DB_HOST") // go_db ou localhost
+	user     = os.Getenv("DB_USER")
+	password = os.Getenv("DB_PASSWORD")
+	dbname   = os.Getenv("DB_NAME")
 )
 
 func ConnectDB() (*sql.DB, error) {
+	port := os.Getenv("DB_PORT") //5433 windows e 5432 docker
+	p, _ := strconv.Atoi(port)
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+		host, p, user, password, dbname)
 
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
